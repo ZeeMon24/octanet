@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        #taskForm {
+            margin-bottom: 20px;
+        }
+
+        #taskList {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .task {
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .priority-high {
+            background-color: #FFD2D2;
+        }
+
+        .priority-medium {
+            background-color: #FFF6D2;
+        }
+
+        .priority-low {
+            background-color: #D2FFD2;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="taskForm">
+        <h2>Add Task</h2>
+        <form id="addTaskForm">
+            <label for="title">Title:</label>
+            <input type="text" id="title" required>
+
+            <label for="description">Description:</label>
+            <textarea id="description" required></textarea>
+
+            <label for="deadline">Deadline:</label>
+            <input type="date" id="deadline" required>
+
+            <label for="priority">Priority:</label>
+            <select id="priority" required>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+            </select>
+
+            <label for="labels">Labels (comma-separated):</label>
+            <input type="text" id="labels" placeholder="e.g., Design, Development">
+
+            <button type="button" onclick="addTask()">Add Task</button>
+        </form>
+    </div>
+
+    <div>
+        <h2>Task List</h2>
+        <button onclick="prioritizeTasks('urgency')">Prioritize by Urgency</button>
+        <button onclick="prioritizeTasks('importance')">Prioritize by Importance</button>
+        <ul id="taskList"></ul>
+    </div>
+
+    <script>
+        const tasks = [];
+
+        function addTask() {
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+            const deadline = document.getElementById('deadline').value;
+            const priority = document.getElementById('priority').value;
+            const labels = document.getElementById('labels').value.split(',').map(label => label.trim());
+
+            const task = { title, description, deadline, priority, labels };
+            tasks.push(task);
+            displayTasks();
+            clearForm();
+        }
+
+        function displayTasks() {
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.className = `task priority-${task.priority.toLowerCase()}`;
+                li.innerHTML = `
+                    <div>
+                        <strong>${task.title}</strong><br>
+                        <span>${task.description}</span><br>
+                        <span>Deadline: ${task.deadline}</span><br>
+                        <span>Priority: ${task.priority}</span><br>
+                        <span>Labels: ${task.labels.join(', ')}</span>
+                    </div>
+                    <button onclick="removeTask(${index})">Remove</button>
+                `;
+                taskList.appendChild(li);
+            });
+        }
+
+        function clearForm() {
+            document.getElementById('title').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('deadline').value = '';
+            document.getElementById('priority').value = 'high';
+            document.getElementById('labels').value = '';
+        }
+
+        function removeTask(index) {
+            tasks.splice(index, 1);
+            displayTasks();
+        }
+
+        function prioritizeTasks(type) {
+            tasks.sort((a, b) => {
+                if (type === 'urgency') {
+                    return new Date(a.deadline) - new Date(b.deadline);
+                } else if (type === 'importance') {
+                    const priorityOrder = { 'high': 1, 'medium': 2, 'low': 3 };
+                    return priorityOrder[a.priority.toLowerCase()] - priorityOrder[b.priority.toLowerCase()];
+                }
+            });
+            displayTasks();
+        }
+    </script>
+
+</body>
+</html>
